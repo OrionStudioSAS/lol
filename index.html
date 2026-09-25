@@ -64,6 +64,12 @@
     #yes {
       background: #2ecc71;
       color: #fff;
+      transition: transform .4s cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    #no {
+      background: #e74c3c;
+      color: #fff;
       z-index: 10;
       /* Le mouvement fluide */
       transition:
@@ -71,12 +77,6 @@
         top .45s cubic-bezier(.34, 1.56, .64, 1),
         transform .45s ease,
         opacity .45s ease;
-    }
-
-    #no {
-      background: #e74c3c;
-      color: #fff;
-      transition: transform .4s cubic-bezier(.34, 1.56, .64, 1);
     }
 
     #bye {
@@ -116,8 +116,9 @@
   </div>
 
   <div id="bye">
-    <div class="big">👋</div>
-    <h2>Bah ntr</h2>
+    <div class="big">💚</div>
+    <h2>Je le savais Lisa 😏</h2>
+    <p>On se voit quand ?</p>
   </div>
 
   <script>
@@ -134,39 +135,39 @@
       "Nan nan nan",
       "T'es sûre Lisa ?",
       "Il rétrécit, dépêche-toi 👀",
-      "Le bouton Non est là hein 👉",
+      "Le bouton Oui est là hein 👈",
       "Allez Lisa, un dernier effort 😂",
     ];
 
-    let yesScale = 1;
     let noScale = 1;
+    let yesScale = 1;
     let moves = 0;
     let gone = false;
 
-    function moveYes(e) {
+    function moveNo(e) {
       if (gone) return;
       if (e) e.preventDefault();
 
-      const rect = yes.getBoundingClientRect();
+      const rect = no.getBoundingClientRect();
 
       // Premier déplacement : on détache le bouton de sa place,
       // en le figeant exactement où il est pour que l'animation parte de là.
-      if (yes.style.position !== 'fixed') {
-        yes.style.position = 'fixed';
-        yes.style.left = rect.left + 'px';
-        yes.style.top = rect.top + 'px';
-        yes.style.margin = '0';
+      if (no.style.position !== 'fixed') {
+        no.style.position = 'fixed';
+        no.style.left = rect.left + 'px';
+        no.style.top = rect.top + 'px';
+        no.style.margin = '0';
         // Force le navigateur à prendre en compte la position de départ
-        yes.getBoundingClientRect();
+        no.getBoundingClientRect();
       }
 
       moves++;
-      yesScale *= 0.8;
-      noScale += 0.22;
+      noScale *= 0.8;
+      yesScale += 0.22;
 
       // Nouvelle position aléatoire, assez loin de l'ancienne
-      const w = yes.offsetWidth;
-      const h = yes.offsetHeight;
+      const w = no.offsetWidth;
+      const h = no.offsetHeight;
       const maxX = window.innerWidth - w - 20;
       const maxY = window.innerHeight - h - 20;
       let x, y, tries = 0;
@@ -176,33 +177,33 @@
         tries++;
       } while (Math.hypot(x - rect.left, y - rect.top) < 180 && tries < 30);
 
-      yes.style.left = x + 'px';
-      yes.style.top = y + 'px';
+      no.style.left = x + 'px';
+      no.style.top = y + 'px';
 
-      if (yesScale < 0.15) {
+      if (noScale < 0.15) {
         gone = true;
-        yes.style.transform = 'scale(0) rotate(360deg)';
-        yes.style.opacity = '0';
-        yes.style.pointerEvents = 'none';
-        taunt.textContent = "Bon bah... il reste plus que Non 🤷";
+        no.style.transform = 'scale(0) rotate(360deg)';
+        no.style.opacity = '0';
+        no.style.pointerEvents = 'none';
+        taunt.textContent = "Bon bah... il reste plus que Oui 🤷";
       } else {
-        yes.style.transform = `scale(${yesScale})`;
+        no.style.transform = `scale(${noScale})`;
         taunt.textContent = taunts[(moves - 1) % taunts.length];
       }
 
-      no.style.transform = `scale(${noScale})`;
+      yes.style.transform = `scale(${yesScale})`;
     }
 
     // Souris : il fuit dès qu'on le survole
-    yes.addEventListener('mouseenter', moveYes);
+    no.addEventListener('mouseenter', moveNo);
     // Mobile : il fuit dès qu'on le touche
-    yes.addEventListener('touchstart', moveYes, { passive: false });
+    no.addEventListener('touchstart', moveNo, { passive: false });
     // Au cas où elle arrive quand même à cliquer (clavier, etc.)
-    yes.addEventListener('click', moveYes);
+    no.addEventListener('click', moveNo);
 
-    no.addEventListener('click', () => {
+    yes.addEventListener('click', () => {
       document.getElementById('question').style.display = 'none';
-      yes.style.display = 'none';
+      no.style.display = 'none';
       document.getElementById('bye').style.display = 'flex';
     });
   </script>
