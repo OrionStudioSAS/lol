@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Question importante 💌</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #ffdde1 0%, #ee9ca7 100%);
+      overflow: hidden;
+      user-select: none;
+    }
+
+    .card {
+      text-align: center;
+      padding: 40px 24px;
+      width: 100%;
+      max-width: 560px;
+    }
+
+    .emoji { font-size: 72px; animation: bounce 1.6s infinite; }
+
+    h1 {
+      font-size: clamp(28px, 7vw, 48px);
+      color: #fff;
+      text-shadow: 0 3px 12px rgba(180, 40, 80, .35);
+      margin: 16px 0 12px;
+    }
+
+    #taunt {
+      min-height: 28px;
+      color: #8a1c3c;
+      font-weight: 600;
+      font-size: 18px;
+      margin-bottom: 32px;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      align-items: center;
+      min-height: 80px;
+    }
+
+    button {
+      font: inherit;
+      font-weight: 700;
+      font-size: 22px;
+      padding: 14px 40px;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, .15);
+    }
+
+    #yes {
+      background: #2ecc71;
+      color: #fff;
+      z-index: 10;
+      /* Le mouvement fluide */
+      transition:
+        left .45s cubic-bezier(.34, 1.56, .64, 1),
+        top .45s cubic-bezier(.34, 1.56, .64, 1),
+        transform .45s ease,
+        opacity .45s ease;
+    }
+
+    #no {
+      background: #e74c3c;
+      color: #fff;
+      transition: transform .4s cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    #bye {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      color: #fff;
+      animation: fadeIn .6s ease;
+    }
+    #bye .big { font-size: 90px; }
+    #bye h2 {
+      font-size: clamp(28px, 7vw, 44px);
+      text-shadow: 0 3px 12px rgba(180, 40, 80, .35);
+    }
+    #bye p { font-size: 20px; color: #8a1c3c; font-weight: 600; }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="card" id="question">
+    <div class="emoji">🥺</div>
+    <h1>Veux-tu sortir avec moi ?</h1>
+    <div id="taunt"></div>
+    <div class="buttons">
+      <button id="yes">Oui</button>
+      <button id="no">Non</button>
+    </div>
+  </div>
+
+  <div id="bye">
+    <div class="big">👋</div>
+    <h2>Merci, au revoir.</h2>
+    <p>C'était un plaisir. Ferme la porte en sortant.</p>
+  </div>
+
+  <script>
+    const yes = document.getElementById('yes');
+    const no = document.getElementById('no');
+    const taunt = document.getElementById('taunt');
+
+    const taunts = [
+      "Oups, raté 😏",
+      "Trop lente !",
+      "Presque...",
+      "Essaie encore 🙃",
+      "Il est timide ce bouton",
+      "Nan nan nan",
+      "T'es sûre ?",
+      "Il rétrécit, dépêche-toi 👀",
+      "Le bouton Non est là hein 👉",
+      "Allez, un dernier effort 😂",
+    ];
+
+    let yesScale = 1;
+    let noScale = 1;
+    let moves = 0;
+    let gone = false;
+
+    function moveYes(e) {
+      if (gone) return;
+      if (e) e.preventDefault();
+
+      const rect = yes.getBoundingClientRect();
+
+      // Premier déplacement : on détache le bouton de sa place,
+      // en le figeant exactement où il est pour que l'animation parte de là.
+      if (yes.style.position !== 'fixed') {
+        yes.style.position = 'fixed';
+        yes.style.left = rect.left + 'px';
+        yes.style.top = rect.top + 'px';
+        yes.style.margin = '0';
+        // Force le navigateur à prendre en compte la position de départ
+        yes.getBoundingClientRect();
+      }
+
+      moves++;
+      yesScale *= 0.8;
+      noScale += 0.22;
+
+      // Nouvelle position aléatoire, assez loin de l'ancienne
+      const w = yes.offsetWidth;
+      const h = yes.offsetHeight;
+      const maxX = window.innerWidth - w - 20;
+      const maxY = window.innerHeight - h - 20;
+      let x, y, tries = 0;
+      do {
+        x = 20 + Math.random() * Math.max(0, maxX - 20);
+        y = 20 + Math.random() * Math.max(0, maxY - 20);
+        tries++;
+      } while (Math.hypot(x - rect.left, y - rect.top) < 180 && tries < 30);
+
+      yes.style.left = x + 'px';
+      yes.style.top = y + 'px';
+
+      if (yesScale < 0.15) {
+        gone = true;
+        yes.style.transform = 'scale(0) rotate(360deg)';
+        yes.style.opacity = '0';
+        yes.style.pointerEvents = 'none';
+        taunt.textContent = "Bon bah... il reste plus que Non 🤷";
+      } else {
+        yes.style.transform = `scale(${yesScale})`;
+        taunt.textContent = taunts[(moves - 1) % taunts.length];
+      }
+
+      no.style.transform = `scale(${noScale})`;
+    }
+
+    // Souris : il fuit dès qu'on le survole
+    yes.addEventListener('mouseenter', moveYes);
+    // Mobile : il fuit dès qu'on le touche
+    yes.addEventListener('touchstart', moveYes, { passive: false });
+    // Au cas où elle arrive quand même à cliquer (clavier, etc.)
+    yes.addEventListener('click', moveYes);
+
+    no.addEventListener('click', () => {
+      document.getElementById('question').style.display = 'none';
+      yes.style.display = 'none';
+      document.getElementById('bye').style.display = 'flex';
+    });
+  </script>
+</body>
+</html>
